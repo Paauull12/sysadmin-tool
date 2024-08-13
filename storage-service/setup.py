@@ -10,6 +10,7 @@ setup(
         "djangorestframework==3.15.2",
         "pillow ~= 9.5.0",
         "mysqlclient",
+        "gunicorn"
     ],
     entry_points={
         'console_scripts': [
