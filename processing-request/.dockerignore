@@ -1,0 +1,24 @@
+processing_service.egg-info/
+venv/
+target/
+
+# Ignore Python bytecode files
+__pycache__
+*.pyc
+
+# Ignore development files
+*.log
+*.sqlite3
+
+# Ignore Docker related files
+.dockerignore
+Dockerfile
+
+# Ignore version control files
+.git
+.gitignore
+
+# Ignore editor specific files
+.vscode/
+.idea/
+*.swp

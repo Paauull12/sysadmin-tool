@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: processing-request-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: processing-request
+  template:
+    metadata:
+      labels:
+        app: processing-request
+    spec:
+      containers:
+      - name: processing-request
+        image: localhost:5000/processing-request:latest
+        ports:
+        - containerPort: 80
+        # Optional: Add readiness and liveness probes if needed
+        readinessProbe:
+          httpGet:
+            path: /healthz  # Assuming you have a health check endpoint
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz  # Assuming you have a health check endpoint
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          

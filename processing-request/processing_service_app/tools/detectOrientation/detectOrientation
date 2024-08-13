@@ -1,0 +1,6 @@
+#!/bin/sh
+
+[ -L "$0" ] && script="$(realpath "$0")" || script="$0"
+
+export TESSDATA_PREFIX=${TESSDATA_PREFIX:-"$(dirname $script)/"}
+$0.bin "$@"
