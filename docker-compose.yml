@@ -1,0 +1,49 @@
+services:
+  upload-interface:
+    build:
+      context: ./upload-interface  
+      dockerfile: Dockerfile        
+    container_name: upload-interface
+    ports:
+      - "80:80"                     
+    depends_on:
+      - storage-service
+
+  storage-service:
+    build:
+      context: ./storage-service  
+      dockerfile: Dockerfile      
+    container_name: storage-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/app1_db
+
+  processing-request:
+    build:
+      context: ./processing-request
+      dockerfile: Dockerfile      
+    container_name: processing-request
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/app2_db
+
+  db:
+    image: postgres:13-alpine
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=app1_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres-data:
