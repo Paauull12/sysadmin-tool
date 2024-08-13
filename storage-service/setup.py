@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'Django==4.1',
+        'Django==4.2.13',
         "djangorestframework==3.15.2",
         "pillow ~= 9.5.0",
         "mysqlclient",
