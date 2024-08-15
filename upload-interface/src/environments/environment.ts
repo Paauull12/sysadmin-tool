@@ -1,5 +1,4 @@
 export const environment = {
   production: false,
-  depositApiUrl: 'http://localhost:5000',
-  documentApiUrl: 'http://localhost:5000',
+  depositApiUrl: 'http://localhost:8000'
 };

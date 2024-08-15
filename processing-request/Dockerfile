@@ -11,4 +11,4 @@ RUN pip install -e .
 
 EXPOSE 80
 
-CMD ["gunicorn", "processing_service.wsgi:application", "--bind", "0.0.0.0:80"]
+CMD ["gunicorn", "processing_service.wsgi:application", "--bind", "0.0.0.0:5000"]

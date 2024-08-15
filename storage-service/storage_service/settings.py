@@ -28,7 +28,10 @@ SECRET_KEY = 'django-insecure-n3d54i9!#!)twc!h3%g#*zh$5)v3owjjcvh%5asxop#i(4lx8h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+ALLOWED_HOSTS = ['localhost' , '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['*']
 
 
 # Application definition
@@ -44,11 +47,15 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'storage_service_app',
+
+    "corsheaders",
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,23 +83,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'storage_service.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# Ubuntu settings
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "HOST": "localhost",
+#         "NAME": "storage_service",
+#         "USER": "storage_service_user",
+#         "PASSWORD": "pleinciel",
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#     }
+# }
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "HOST": "localhost",
-        "NAME": "storage_service",
-        "USER": "storage_service_user",
-        "PASSWORD": "pleinciel",
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'app1_db',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'postgres-db',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

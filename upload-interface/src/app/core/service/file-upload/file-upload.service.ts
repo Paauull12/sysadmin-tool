@@ -10,7 +10,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class FileUploadService {
   private apiUrl = environment.depositApiUrl;
-  private resourceUrl = 'api/processingrequests/';
+  private resourceUrl = 'api/upload/';
   private n = 100;
   private a = new Array(this.n);
   private mockedObservable: Observable<number>;
@@ -30,8 +30,7 @@ export class FileUploadService {
   ): Observable<HttpEvent<any>> {
     console.log('uploading to:', this.apiUrl);
     const formData = new FormData();
-    formData.append('files', file, file.name);
-    formData.append('auto_extract_only', String(auto_extract_only));
+    formData.append('file', file, file.name);
     return this.http.post(`${this.apiUrl}/${this.resourceUrl}`, formData, {
       reportProgress: true,
       observe: 'events',

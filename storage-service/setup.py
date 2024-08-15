@@ -9,8 +9,9 @@ setup(
         'Django==4.2.13',
         "djangorestframework==3.15.2",
         "pillow ~= 9.5.0",
-        "mysqlclient",
-        "gunicorn"
+        "gunicorn",
+        "psycopg2",
+        "django-cors-headers",
     ],
     entry_points={
         'console_scripts': [
