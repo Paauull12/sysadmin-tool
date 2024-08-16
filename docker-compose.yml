@@ -25,11 +25,11 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_ENDPOINT=http://minio:9000
 
-  processing-request:
+  photo-display-service:
     build:
-      context: ./processing-request
+      context: ./photo-display
       dockerfile: Dockerfile      
-    container_name: processing-request
+    container_name: photo-display-service
     ports:
       - "5000:5000"
     depends_on:
