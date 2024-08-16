@@ -10,6 +10,7 @@ setup(
         "djangorestframework==3.15.2",
         "Pillow ~= 9.5.0",
         "gunicorn",
+        "psycopg2",
         "django-cors-headers==4.4.0",
     ],
     entry_points={

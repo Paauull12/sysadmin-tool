@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from .models import Image
 
-
-class ImageUploadSerializer(serializers.Serializer):
-    image_path = serializers.CharField(max_length=255)
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ['id', 'image', 'uploaded_at']
