@@ -14,6 +14,7 @@ setup(
         "django-cors-headers",
         "minio",
         "django-storages",
+        "boto3",
     ],
     entry_points={
         'console_scripts': [
