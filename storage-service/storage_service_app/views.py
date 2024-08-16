@@ -1,67 +1,69 @@
 from datetime import datetime
-from pathlib import Path
-
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-
-from storage_service import settings
 from .models import Image
-
 
 class ImageUploadAPI(APIView):
     parser_classes = (MultiPartParser, FormParser,)
 
     def post(self, request, *args, **kwargs):
         """
-        Store Image API Endpoint Documentation
+        Store Image API Endpoint
 
-        This API endpoint allows users to store an image file into the database.
+        This endpoint allows users to upload an image file and store it in both the database and MinIO S3-compatible storage.
 
-        Example usage with curl:
+        Method: POST
+        Endpoint: /api/store/
+        Content-Type: multipart/form-data
 
-        curl -X POST http://localhost:8000/api/store/ \\
-          -H 'Content-Type: multipart/form-data' \\
-          -F 'file=@/home/dev/Downloads/test_image.jpg'
-
-        Explanation of the curl command:
-        - `-X POST`: Specifies the HTTP method as POST, indicating that data will be submitted to the server.
-        - `http://localhost:8000/api/store/`: The URL of the API endpoint where the image will be uploaded.
-        - `-H 'Content-Type: multipart/form-data'`: Specifies that the request body contains a multipart form for file upload.
-        - `-F 'file=@/home/dev/Downloads/test_image.jpg'`: Adds a file field (`file`) to the form data being submitted.
-          - Replace `/home/dev/Downloads/test_image.jpg` with the actual path to the image file on your local machine.
+        Request:
+        - file: The image file to be uploaded (required)
 
         Response:
-        - Upon successful upload, the API will respond with a status code 201 (Created) and a JSON response indicating success:
+        - 201 Created: Image uploaded successfully
           {
-            "message": "Image stored successfully"
+            "message": "Image stored successfully",
+            "image_url": "http://minio:9000/images/filename.jpg"
+          }
+        - 400 Bad Request: No file in request or upload failed
+          {
+            "error": "Error message"
           }
 
+        Example usage with curl:
+        curl -X POST http://localhost:8000/api/store/ \
+          -H 'Content-Type: multipart/form-data' \
+          -F 'file=@/path/to/your/image.jpg'
+
         Notes:
-        - Ensure that the Django server is running and accessible at `http://localhost:8000`.
-        - Adjust the file path (`/home/dev/Downloads/test_image.jpg`) to match the location of the image file you wish to upload.
-        - Verify permissions and file existence on the local machine before running the curl command.
-        - Monitor the command-line output for any errors or warnings, and check Django server logs (`python manage.py runserver`) for additional information.
+        - Ensure the MinIO server is running and accessible.
+        - The image will be stored in the MinIO 'images' bucket.
+        - The Image model will store metadata about the uploaded image, including its MinIO URL.
         """
 
-        file_obj = request.FILES['file']
+        file_obj = request.FILES.get('file')
 
-        if file_obj:
-            # Save the file to MEDIA_ROOT
-            file_path = Path(settings.MEDIA_ROOT, file_obj.name)
-            with open(file_path, 'wb+') as destination:
-                for chunk in file_obj.chunks():
-                    destination.write(chunk)
-
-            # Create Image model instance with image name and current date/time
-            image_instance = Image.objects.create(
-                image=file_obj.name
-            )
-
-            # Manually set the uploaded_at field
-            image_instance.uploaded_at = datetime.now()
-            image_instance.save()
-            return Response({'message': 'Image stored successfully'}, status=status.HTTP_201_CREATED)
-        else:
+        if not file_obj:
             return Response({'error': 'No file found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Generate a unique filename to avoid conflicts
+            filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{file_obj.name}"
+
+            # Save the file to MinIO using django-storages
+            file_path = default_storage.save(filename, ContentFile(file_obj.read()))
+
+            # Create Image model instance
+            image_instance = Image.objects.create(image=file_path)
+
+            return Response({
+                'message': 'Image stored successfully',
+                'image_url': image_instance.minio_url
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': f'Failed to upload image: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)

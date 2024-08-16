@@ -152,3 +152,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MINIO_ACCESS_KEY = os.environ.get('MINIO_ACCESS_KEY')
 MINIO_SECRET_KEY = os.environ.get('MINIO_SECRET_KEY')
 MINIO_ENDPOINT = os.environ.get('MINIO_ENDPOINT')
+
+DEFAULT_FILE_STORAGE = 'storage_service_app.storage.MinioStorage'
