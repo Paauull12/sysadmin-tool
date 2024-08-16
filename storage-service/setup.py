@@ -12,6 +12,8 @@ setup(
         "gunicorn",
         "psycopg2",
         "django-cors-headers",
+        "minio",
+        "django-storages",
     ],
     entry_points={
         'console_scripts': [
