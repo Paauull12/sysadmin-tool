@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -135,3 +135,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MINIO_ACCESS_KEY = os.environ.get('MINIO_ACCESS_KEY')
+MINIO_SECRET_KEY = os.environ.get('MINIO_SECRET_KEY')
+MINIO_ENDPOINT = os.environ.get('MINIO_ENDPOINT')
+PUBLIC_MINIO_URL = 'http://localhost:9000' # to access in browser outside of the Docker network
+
+DEFAULT_FILE_STORAGE = 'display_service_app.storage.MinioStorage'

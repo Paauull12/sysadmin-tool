@@ -1,7 +1,6 @@
 from django.urls import path
-
-from display_service_app.views import ImageVisualizationView
+from . import views
 
 urlpatterns = [
-    path('view/', ImageVisualizationView.as_view(), name='image_view'),
+    path('', views.image_list, name='image_list'),
 ]

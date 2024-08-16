@@ -1,21 +1,12 @@
-from rest_framework.views import APIView
-from django.http import JsonResponse
-from rest_framework import status
+from django.shortcuts import render
+from django.core.paginator import Paginator
 from .models import Image
-from .serializers import ImageSerializer
 
-class ImageVisualizationView(APIView):
-    def get(self, request):
-        try:
-            # Retrieve the latest image from the database
-            latest_image = Image.objects.latest('uploaded_at')
+def image_list(request):
+    images = Image.objects.all().order_by('-uploaded_at')
+    paginator = Paginator(images, 12)  # Show 12 images per page
 
-            # Serialize the image data
-            serializer = ImageSerializer(latest_image)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-            # Return only the serialized data (body)
-            return JsonResponse(serializer.data)
-
-        except Image.DoesNotExist:
-            # Handle the case where no images exist in the database
-            return JsonResponse({"error": "No images found"}, status=status.HTTP_404_NOT_FOUND)
+    return render(request, 'image_list.html', {'page_obj': page_obj})
