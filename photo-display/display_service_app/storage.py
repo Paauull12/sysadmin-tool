@@ -25,3 +25,8 @@ class MinioStorage(S3Boto3Storage):
 
     def url(self, name):
         return f"{self.endpoint_url}/{self.bucket_name}/{name}"
+    
+    def set_cors_headers(self, request, **kwargs):
+        request.headers['Access-Control-Allow-Origin'] = '*'
+        request.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, HEAD'
+        request.headers['Access-Control-Allow-Headers'] = '*'
