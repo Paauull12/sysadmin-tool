@@ -15,6 +15,8 @@ setup(
         "minio",
         "django-storages",
         "boto3",
+        "requests",
+        "django-prometheus",
     ],
     entry_points={
         'console_scripts': [

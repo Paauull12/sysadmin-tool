@@ -54,15 +54,17 @@
 </head>
 <body>
     <h1>Image Gallery</h1>
-    <div class="image-grid">
-        {% for image in page_obj %}
-            <div class="image-item">
-                <img src="{{ image.get_public_url }}" alt="{{ image.image.name }}">
-                <p>Uploaded: {{ image.uploaded_at|date:"F d, Y H:i" }}</p>
-            </div>
-        {% empty %}
-            <p>No images found.</p>
-        {% endfor %}
+     <div class="image-grid">
+            {% for image in page_obj %}
+                <a href="{% url 'image-retrieve' image.id %}" class="image-link">
+                    <div class="image-item">
+                        <img src="{{ image.get_public_url }}" alt="{{ image.image.name }}">
+                        <p>Uploaded: {{ image.uploaded_at|date:"F d, Y H:i" }}</p>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="no-images">No images found.</p>
+            {% endfor %}
     </div>
     
     <div class="pagination">

@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .models import Image
+import requests
+import os
 
 class ImageUploadAPI(APIView):
     parser_classes = (MultiPartParser, FormParser,)
@@ -46,20 +48,77 @@ class ImageUploadAPI(APIView):
         """
 
         file_obj = request.FILES.get('file')
-
+    
         if not file_obj:
             return Response({'error': 'No file found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Generate a unique filename to avoid conflicts
+            file_content = file_obj.read()
+            
+            file_contents = ContentFile(file_content)
+            file_contents_aux = file_contents
+
+            try:
+                file_contents_baw = requests.post(
+                    "http://black-white:80/upload",
+                    files={'image': file_contents_aux}
+                )
+
+                img_baw = ContentFile(file_contents_baw.content)
+
+                print(img_baw)
+                print(file_contents)
+            except Exception as e:
+                print(e)
+
             filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{file_obj.name}"
 
-            # Save the file to MinIO using django-storages
-            file_path = default_storage.save(filename, ContentFile(file_obj.read()))
+            file_path = default_storage.save(filename, img_baw)
 
-            # Create Image model instance
             image_instance = Image.objects.create(image=file_path)
 
+            needed_information = requests.post(
+                "http://textDetection:80/api/process-image/",
+                files={'image_with_password': ContentFile(file_content, name=filename)}
+            )
+
+            weHaveAutio = False
+            try:
+                audioFile = requests.post(
+                    "http://ttsapp:80/api/listen/",
+                    data={"text": str(needed_information.json())},
+                    timeout=10  
+                )
+                audioFile.raise_for_status() 
+                weHaveAutio = True 
+            except Exception as e:
+                print(e)
+
+            data = {
+                "sender": "andreidabreanu123@gmail.com",
+                "receiver": "pdobrescu@luminess.eu",
+                "text": f"Credentialele tale în JSON sunt {needed_information.json()}",
+                "password": "axvjsluwogohmfma"
+            }
+
+            files = None
+            if weHaveAutio:
+                files = {"audio": ("audio.mp3", audioFile.content, "audio/mpeg")}
+
+            try:
+                trimiteInformatiiPeMail = requests.post(
+                    "http://emailsender:80/api/send-mail/",
+                    data=data,
+                    files=files  
+                )
+
+                if trimiteInformatiiPeMail.status_code == 200:
+                    print("Email sent successfully!")
+                else:
+                    print(f"Failed to send email. Status code: {trimiteInformatiiPeMail.status_code}")
+            except requests.exceptions.RequestException as e:
+                print(f"An error occurred: {e}")
+            
             return Response({
                 'message': 'Image stored successfully',
                 'image_url': image_instance.minio_url

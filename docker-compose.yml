@@ -8,6 +8,65 @@ services:
       - "80:80"                     
     depends_on:
       - storage-service
+    networks:
+      - my_network
+
+  ttsapp:
+    build:
+      context: ./ttsapp
+      dockerfile: Dockerfile
+    container_name: ttsapp
+    command: gunicorn --bind 0.0.0.0:80 ttsapp.wsgi:application
+    ports:
+      - "8070:80"
+    depends_on:
+      - storage-service
+    networks:
+      - my_network
+
+  black-white:
+    build: 
+      context: ./making_a_hell_webserverwithcpp
+      dockerfile: Dockerfile
+    container_name: black-white
+    ports:
+      - "8080:80"
+    depends_on:
+      - storage-service
+    networks:
+      - my_network
+
+  emailsender:
+    build: 
+      context: ./emailsender
+      dockerfile: Dockerfile
+    container_name: emailsender
+    command: python manage.py runserver 0.0.0.0:80
+    ports:
+      - "7000:80"
+    environment:
+      - DEBUG=True
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_USE_TLS=True
+      - EMAIL_HOST_USER=andreidabreanu123@gmail.com
+      - EMAIL_HOST_PASSWORD=axvjsluwogohmfma
+    networks:
+      - my_network
+    depends_on:
+      - storage-service
+
+  textDetection:
+    build:
+      context: ./textDetection
+      dockerfile: Dockerfile  # This line is optional if the file is named 'Dockerfile'
+    image: microservices-textdetection
+    ports:
+      - "6000:80"  # Maps port 6000 on the host to port 80 in the container
+    environment:
+      - DJANGO_SETTINGS_MODULE=textDetection.settings
+    networks:
+      - my_network
 
   storage-service:
     build:
@@ -20,10 +79,12 @@ services:
       - db
       - minio
     environment:
-      - DATABASE_URL=postgres://user:password@db:5432/app1_db
+      - DATABASE_URL=postgres://user:password@db:5432/app1_dbSS
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_ENDPOINT=http://minio:9000
+    networks:
+      - my_network
 
   photo-display-service:
     build:
@@ -40,6 +101,8 @@ services:
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_ENDPOINT=http://minio:9000
+    networks:
+      - my_network
 
   db:
     image: postgres:13-alpine
@@ -53,6 +116,8 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - my_network
 
   minio: # for image storage
     image: minio/minio
@@ -66,7 +131,47 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_CORS_ALLOW_ORIGINS: "*"
     command: server /data --console-address ":9001"
+    networks:
+      - my_network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+    depends_on:
+      - storage-service
+    networks:
+      - my_network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - my_network
+
 
 volumes:
   postgres-data:
   minio_data:
+  prom_data:
+
+networks:
+  my_network:
+    driver: bridge

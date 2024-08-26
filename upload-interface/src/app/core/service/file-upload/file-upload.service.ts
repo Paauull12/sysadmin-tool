@@ -28,6 +28,7 @@ export class FileUploadService {
     file: File,
     auto_extract_only: boolean = false
   ): Observable<HttpEvent<any>> {
+    console.log(this.apiUrl);
     console.log('uploading to:', this.apiUrl);
     const formData = new FormData();
     formData.append('file', file, file.name);
